@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}学生首页 - 智汇校园{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- 侧边栏 -->
+    <div class="col-md-3">
+        <div class="sidebar bg-white rounded-lg shadow-sm p-4 sticky-top" style="top: 20px;">
+            <div class="text-center mb-4">
+                <img src="{{ url_for('static', filename='uploads/avatars/' + current_user.avatar) if current_user.avatar != 'default.jpg' else url_for('static', filename='images/default-avatar.png') }}"
+                    class="avatar rounded-circle mb-3 border-2 border-primary"
+                    style="width: 100px; height: 100px; object-fit: cover;">
+                <h5 class="font-weight-bold">{{ current_user.real_name }}</h5>
+                <p class="text-muted small">{{ current_user.student_id }}</p>
+                <p class="text-muted small">{{ current_user.department }}</p>
+            </div>
+            <hr class="my-3">
+            <nav class="nav flex-column">
+                <a class="nav-link active rounded-lg mb-2 p-2" href="{{ url_for('user_dashboard') }}">
+                    <i class="fas fa-home me-2"></i> 首页
+                </a>
+                <a class="nav-link rounded-lg mb-2 p-2" href="{{ url_for('service_repair_list') }}">
+                    <i class="fas fa-tools me-2"></i> 我的报修
+                </a>
+                <a class="nav-link rounded-lg mb-2 p-2" href="{{ url_for('education_course_list') }}">
+                    <i class="fas fa-book me-2"></i> 我的课程
+                </a>
+                <a class="nav-link rounded-lg mb-2 p-2" href="{{ url_for('education_grade_list') }}">
+                    <i class="fas fa-chart-line me-2"></i> 成绩查询
+                </a>
+                <a class="nav-link rounded-lg mb-2 p-2" href="{{ url_for('service_activity_list') }}">
+                    <i class="fas fa-calendar-alt me-2"></i> 校园活动
+                </a>
+                <a class="nav-link rounded-lg mb-2 p-2" href="{{ url_for('user_profile') }}">
+                    <i class="fas fa-user me-2"></i> 个人资料
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- 主要内容区 -->
+    <div class="col-md-9">
+        <!-- 欢迎卡片 -->
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-body bg-gradient-primary text-white rounded-lg">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <h4 class="font-weight-bold">欢迎回来，{{ current_user.real_name }}！</h4>
+                        <p class="text-white-80" id="current-date"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快捷操作 -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card text-center h-100 border-0 shadow-sm hover-shadow">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <i class="fas fa-tools fa-3x text-primary mb-3"></i>
+                        <h5 class="mb-3">我要报修</h5>
+                        <a href="{{ url_for('service_repair_create') }}"
+                            class="btn btn-sm btn-outline-primary rounded-pill">立即申请</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card text-center h-100 border-0 shadow-sm hover-shadow">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <i class="fas fa-search fa-3x text-success mb-3"></i>
+                        <h5 class="mb-3">失物招领</h5>
+                        <a href="{{ url_for('service_lostfound_list') }}"
+                            class="btn btn-sm btn-outline-success rounded-pill">查看</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card text-center h-100 border-0 shadow-sm hover-shadow">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <i class="fas fa-calendar-plus fa-3x text-info mb-3"></i>
+                        <h5 class="mb-3">校园活动</h5>
+                        <a href="{{ url_for('service_activity_list') }}"
+                            class="btn btn-sm btn-outline-info rounded-pill">报名</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card text-center h-100 border-0 shadow-sm hover-shadow">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <i class="fas fa-book-open fa-3x text-warning mb-3"></i>
+                        <h5 class="mb-3">课程作业</h5>
+                        <a href="{{ url_for('education_homework_list') }}"
+                            class="btn btn-sm btn-outline-warning rounded-pill">查看</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 最近的报修 -->
+            <div class="col-md-6 mb-4">
+                <div class="card border-0 shadow-sm rounded-lg">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-white border-bottom-0">
+                        <span class="font-weight-bold"><i class="fas fa-tools me-2 text-primary"></i>最近的报修</span>
+                        <a href="{{ url_for('service_repair_list') }}"
+                            class="btn btn-sm btn-link text-decoration-none text-primary">查看更多</a>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_repairs %}
+                        <div class="list-group">
+                            {% for repair in recent_repairs %}
+                            <div class="list-group-item border-0 py-3 hover-bg">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1 font-weight-medium">{{ repair.title }}</h6>
+                                        <small class="text-muted">{{ repair.create_time|strftime('%Y-%m-%d %H:%M')
+                                            }}</small>
+                                    </div>
+                                    <span
+                                        class="badge rounded-pill bg-{{ 'warning' if repair.status == '待处理' else 'info' if repair.status == '处理中' else 'success' if repair.status == '已完成' else 'danger' }}">
+                                        {{ repair.status }}
+                                    </span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted text-center py-3">暂无报修记录</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 热门活动 -->
+            <div class="col-md-6 mb-4">
+                <div class="card border-0 shadow-sm rounded-lg">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-white border-bottom-0">
+                        <span class="font-weight-bold"><i class="fas fa-calendar-alt me-2 text-info"></i>热门活动</span>
+                        <a href="{{ url_for('service_activity_list') }}"
+                            class="btn btn-sm btn-link text-decoration-none text-info">查看更多</a>
+                    </div>
+                    <div class="card-body">
+                        {% if activities %}
+                        <div class="list-group">
+                            {% for activity in activities %}
+                            <a href="{{ url_for('service_activity_detail', activity_id=activity.id) }}"
+                                class="list-group-item list-group-item-action border-0 py-3 hover-bg">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1 font-weight-medium">{{ activity.title }}</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-map-marker-alt me-1"></i>{{ activity.location }}
+                                            <i class="fas fa-users ms-2 me-1"></i>{{ activity.current_participants }}/{{
+                                            activity.max_participants }}
+                                        </small>
+                                    </div>
+                                    <span class="badge rounded-pill bg-primary">{{ activity.status }}</span>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted text-center py-3">暂无活动</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 课程表 -->
+        <div class="card mt-4 border-0 shadow-sm rounded-lg">
+            <div class="card-header d-flex justify-content-between align-items-center bg-white border-bottom-0">
+                <span class="font-weight-bold"><i class="fas fa-table me-2 text-warning"></i>本周课程表</span>
+                <a href="{{ url_for('education_course_list') }}"
+                    class="btn btn-sm btn-link text-decoration-none text-warning">查看完整课表</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="80px" class="text-center">时间</th>
+                                <th class="text-center">周一</th>
+                                <th class="text-center">周二</th>
+                                <th class="text-center">周三</th>
+                                <th class="text-center">周四</th>
+                                <th class="text-center">周五</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in range(1, 6) %}
+                            <tr>
+                                <td class="text-center font-weight-medium">第{{ i }}节</td>
+                                <td>
+                                    {% for course in courses %}
+                                    {% if '周一' in course.schedules and i|string in course.schedules %}
+                                    <div class="p-2 mb-1 bg-primary bg-opacity-10 rounded">
+                                        {{ course.name }}<br><small class="text-muted">{{ course.location }}</small>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% for course in courses %}
+                                    {% if '周二' in course.schedules and i|string in course.schedules %}
+                                    <div class="p-2 mb-1 bg-secondary bg-opacity-10 rounded">
+                                        {{ course.name }}<br><small class="text-muted">{{ course.location }}</small>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% for course in courses %}
+                                    {% if '周三' in course.schedules and i|string in course.schedules %}
+                                    <div class="p-2 mb-1 bg-success bg-opacity-10 rounded">
+                                        {{ course.name }}<br><small class="text-muted">{{ course.location }}</small>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% for course in courses %}
+                                    {% if '周四' in course.schedules and i|string in course.schedules %}
+                                    <div class="p-2 mb-1 bg-info bg-opacity-10 rounded">
+                                        {{ course.name }}<br><small class="text-muted">{{ course.location }}</small>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% for course in courses %}
+                                    {% if '周五' in course.schedules and i|string in course.schedules %}
+                                    <div class="p-2 mb-1 bg-warning bg-opacity-10 rounded">
+                                        {{ course.name }}<br><small class="text-muted">{{ course.location }}</small>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .hover-bg:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .nav-link {
+        transition: all 0.3s ease;
+    }
+
+    .nav-link:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .nav-link.active {
+        background-color: rgba(0, 123, 255, 0.2);
+        font-weight: 500;
+    }
+</style>
+<script>
+    // 获取当前日期
+    function getCurrentDate() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+        const weekday = weekdays[now.getDay()];
+
+        document.getElementById('current-date').textContent = `今天是 ${year}年${month}月${day}日 ${weekday}`;
+    }
+
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', function () {
+        getCurrentDate();
+
+        // 为卡片添加动画效果
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.5s ease';
+
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100);
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}
